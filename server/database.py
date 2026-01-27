@@ -13,4 +13,20 @@ MONGO_DETAILS = os.getenv("MONGO_URI", "mongodb+srv://<username>:<password>@clus
 # Add tlsAllowInvalidCertificates=True if you encounter SSL errors locally
 client = AsyncIOMotorClient(MONGO_DETAILS, tlsAllowInvalidCertificates=True)
 database = client.chatbot_db
+
+# Collections
 user_collection = database.get_collection("users")
+history_collection = database.get_collection("histories")
+conversation_collection = database.get_collection("conversations")
+
+
+async def create_indexes():
+    """Create database indexes for optimal performance"""
+    # Conversations indexes
+    await conversation_collection.create_index([("historique_id", 1), ("last_updated", -1)])
+    await conversation_collection.create_index([("_id", 1), ("historique_id", 1)])
+    
+    # Histories indexes
+    await history_collection.create_index([("user_id", 1)], unique=True)
+    
+    print("✅ Database indexes created successfully")

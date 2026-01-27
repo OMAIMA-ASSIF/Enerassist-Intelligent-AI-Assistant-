@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from qdrantdb import get_embeddings, get_vector_config
+from ai.qdrantdb import get_embeddings, get_vector_config
 from langchain_qdrant import QdrantVectorStore
 from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -9,13 +9,16 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
-from tools.mcp_bridge import call_mcp_jira_ticket
+from ai.tools.mcp_bridge import call_mcp_jira_ticket
 from langchain_core.tools import tool
 #from langchain_google_genai import ChatGoogleGenerativeAI
 #from langchain_core.output_parsers import StrOutputParser
 
 
-load_dotenv()
+from pathlib import Path
+
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 store = {}
 

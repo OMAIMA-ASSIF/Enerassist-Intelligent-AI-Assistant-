@@ -3,7 +3,10 @@ from dotenv import load_dotenv
 from langchain_mistralai import MistralAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
 
-load_dotenv()
+from pathlib import Path
+
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 def get_embeddings():
     return MistralAIEmbeddings(api_key=os.getenv("MISTRAL_API_KEY"))
