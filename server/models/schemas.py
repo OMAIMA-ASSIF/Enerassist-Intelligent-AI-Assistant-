@@ -2,7 +2,7 @@
 MongoDB Data Models and Pydantic Schemas
 Handles all data structures for the chatbot application
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
@@ -102,3 +102,30 @@ class PaginationParams(BaseModel):
     """Pagination parameters"""
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=20, ge=1, le=100)
+
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(min_length=6)
+
+class UserResponse(BaseModel):
+    id: str
+    username: str
+    email: EmailStr
+
+    class Config:
+        # Pydantic v2 usage might differ slightly, but this is generally safe for v1/v2 compat or v1
+        pass
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email: Optional[str] = None

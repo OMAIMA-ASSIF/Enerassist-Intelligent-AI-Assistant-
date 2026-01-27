@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from server.database import user_collection
-from server.schemas import UserCreate, UserLogin, Token
+from server.models import UserCreate, UserLogin, Token
 from server.utils import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta, datetime
 
