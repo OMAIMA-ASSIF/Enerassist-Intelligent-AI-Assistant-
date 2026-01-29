@@ -11,8 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 from ai.tools.mcp_bridge import call_mcp_jira_ticket
 from langchain_core.tools import tool
-#from langchain_google_genai import ChatGoogleGenerativeAI
-#from langchain_core.output_parsers import StrOutputParser
+from langchain_core.tools import tool
 
 
 from pathlib import Path
@@ -74,14 +73,6 @@ def get_chatbot_chain():
     )
 
     #Configuration du modèle LLM
-    """
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-3-flash-preview", 
-        temperature=0.2, # <--- Juste ici
-        google_api_key=os.getenv("GOOGLE_API_KEY")
-    )
-    J'ai trouvé que mistral est mieux pour ce cas d'usage :)
-    """
     llm = ChatMistralAI(
         model="mistral-large-latest", 
         api_key=os.getenv("MISTRAL_API_KEY"),

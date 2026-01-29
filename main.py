@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from datetime import datetime
 #import all routes 
 from server.routes.chat import router as chat_router
 from server.routes.history import router as history_router
@@ -13,14 +14,14 @@ from server.database import create_indexes
 async def lifespan(app: FastAPI):
     """Lifecycle manager for startup/shutdown events"""
     # Startup
-    print("🚀 Starting chatbot backend...")
+    print("Starting chatbot backend...")
     await create_indexes()
-    print("✅ Backend initialized successfully")
+    print("Backend initialized successfully")
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down chatbot backend...")
+    print("Shutting down chatbot backend...")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -45,20 +46,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Health check endpoint
-@app.get("/")
-def root():
-    return {
-        "message": "AI Chatbot Backend is Running",
-        "version": "1.0.0",
-        "status": "healthy"
-    }
-
-
 @app.get("/health")
+@app.get("/")
 def health_check():
+    """Service health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": "2026-01-27T12:00:00Z"
+        "service": "AI Chatbot API",
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat()
     }
 # Include all routers
 app.include_router(auth_router, prefix="/auth", tags=["auth"])

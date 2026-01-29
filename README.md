@@ -1,95 +1,92 @@
-# AI Chatbot Backend
+# 🤖 AI Chatbot Fullstack (FastAPI + React + LangChain)
 
-A production-ready AI chatbot backend built with FastAPI, LangChain, and Qdrant.
+Ce projet est un chatbot IA complet spécialisé dans le dépannage technique des vannes, utilisant une architecture RAG (Retrieval-Augmented Generation) avec Mistral AI et Qdrant.
 
-## Prerequisites
+---
 
-- Python 3.11+
-- MongoDB Atlas Account
-- Qdrant Cloud Account
-- Mistral AI API Key
+## 🚀 Installation Rapide
 
-## Setup Instructions
-
-1.  **Clone the repository**
-    ```bash
-    git clone <your-repo-url>
-    cd CHATBOT_H15
-    ```
-
-2.  **Create and activate a virtual environment**
-    ```bash
-    # Windows
-    python -m venv venv
-    .\venv\Scripts\activate
-
-    # Linux/Mac
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Environment Configuration**
-    
-    You need to create two `.env` files based on the examples provided.
-
-    *   **Server Config**: Copy `server/.env.example` to `server/.env` and fill in your MongoDB URI and Secret Key.
-        ```bash
-        cp server/.env.example server/.env
-        ```
-    
-    *   **AI Config**: Copy `ai/.env.example` to `ai/.env` and fill in your Qdrant and Mistral API keys.
-        ```bash
-        cp ai/.env.example ai/.env
-        ```
-
-    **Note:** The `.env` files contain sensitive keys and are ignored by git. You must create them locally for the project to function.
-
-5.  **Run the Server**
-    ```bash
-    uvicorn main:app --reload
-    ```
-    The server will start at `http://127.0.0.1:8000`.
-
-## API Usage Example
-
-### 1. Signup
-```bash
-curl -X POST http://localhost:8000/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123"
-  }'
+### 1. Cloner le projet
+```powershell
+git clone <url-du-repo>
+cd CHATBOT_H15
 ```
 
-### 2. Login
-```bash
-curl -X POST http://localhost:8000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
-*Copy the `access_token` from the response.*
+---
 
-### 3. Send Message
-```bash
-curl -X POST http://localhost:8000/chat/send \
-  -H "Authorization: Bearer <YOUR_ACCESS_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Hello, how are you?"
-  }'
+## 🏗️ Configuration du Backend (FastAPI)
+
+Le backend gère l'authentification, l'historique des conversations et l'intelligence artificielle.
+
+### 1. Créer l'environnement virtuel
+```powershell
+python -m venv venv
+# Activer sur Windows (PowerShell) :
+.\venv\Scripts\Activate.ps1
 ```
 
-## Project Structure
-- `server/`: Core FastAPI backend, auth, and database routes.
-- `ai/`: LangChain logic, Qdrant integration, and chatbot implementation.
-- `main.py`: Entry point for the application. 
+### 2. Installer les dépendances
+```powershell
+pip install -r requirements.txt
+```
+
+### 3. Configuration des variables d'environnement
+Vous devez créer **deux** fichiers `.env` :
+
+*   **Fichier 1 : `./server/.env`**
+    ```env
+    MONGO_URI=votre_uri_mongodb_atlas
+    SECRET_KEY=votre_clé_secrète_jwt
+    ```
+*   **Fichier 2 : `./ai/.env`**
+    ```env
+    MISTRAL_API_KEY=votre_clé_mistral
+    QDRANT_URL=votre_url_qdrant
+    QDRANT_API_KEY=votre_clé_qdrant
+    ```
+
+### 4. Lancer le Backend
+Depuis la racine du projet (`CHATBOT_H15`), utilisez cette commande robuste :
+```powershell
+.\venv\Scripts\python -m uvicorn main:app --reload
+```
+L'API sera disponible sur : `http://localhost:8000`
+
+---
+
+## 💻 Configuration du Frontend (React + Vite)
+
+Le frontend est une interface moderne et réactive.
+
+### 1. Accéder au dossier client
+```powershell
+cd client
+```
+
+### 2. Installer les paquets
+```powershell
+npm install
+```
+
+### 3. Lancer le projet
+```powershell
+npm run dev
+```
+L'interface sera disponible sur : `http://localhost:5173` (ou 3000 selon votre config).
+
+---
+
+## 📂 Structure du Projet
+
+*   `server/` : Logique FastAPI, Authentification (JWT), et modèles de données.
+*   `ai/` : Moteur de l'IA, intégration LangChain et base de données vectorielle Qdrant.
+*   `client/` : Application React avec TailwindCSS/CSS moderne.
+*   `main.py` : Point d'entrée principal de l'API.
+
+---
+
+## 💡 Notes Importantes (Windows / PowerShell)
+
+*   **Erreur de Scripts** : Si PowerShell bloque l'activation du `venv`, lancez une fois :
+    `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+*   **MongoDB** : Assurez-vous d'avoir ajouté votre adresse IP dans la section **Network Access** de votre dashboard MongoDB Atlas.

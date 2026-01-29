@@ -1,12 +1,27 @@
-# Python and Venv
+# Dependencies
 venv/
 .venv/
 env/
-__pycache__/
+node_modules/
+**/node_modules/
+
+# Python artifacts
+**/__pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Environment Variables pushed pour le test 
+# Build artifacts
+dist/
+build/
+**/dist/
+
+# Environment Variables (CRITICAL)
+.env
+*.env
+.env.*
+!.env.example
 
 # IDEs
 .idea/
@@ -14,9 +29,11 @@ __pycache__/
 *.swp
 *.swo
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Logs
 *.log
+npm-debug.log*

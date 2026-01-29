@@ -16,10 +16,15 @@ class MessageBase(BaseModel):
     texte: str = Field(..., min_length=1, max_length=10000)
     date: datetime = Field(default_factory=datetime.utcnow)
 
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "role": "user",
+                "texte": "Bonjour",
+                "date": "2024-01-29T11:00:00Z"
+            }
         }
+    }
 
 
 class MessageResponse(MessageBase):
@@ -128,4 +133,4 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    email: Optional[str] = None
+    sub: Optional[str] = None
