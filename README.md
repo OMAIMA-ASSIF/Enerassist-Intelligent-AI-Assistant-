@@ -13,6 +13,11 @@ Ce projet est un chatbot intelligent spécialisé dans le **dépannage technique
 *   **🔐 Authentification Sécurisée** : Système robuste basé sur JWT et FastAPI.
 
 ---
+## 📺 Démonstration du projet HI5
+<video src="URL_DIRECTE_DE_TA_VIDEO" controls width="100%">
+  Votre navigateur ne supporte pas la lecture de vidéos.
+</video>
+
 
 ## 🏗️ Stack Technique
 
