@@ -5,6 +5,7 @@ from typing import List, Optional, Dict
 from datetime import datetime
 from bson import ObjectId
 from fastapi import HTTPException, status
+import uuid
 
 from server.database import conversation_collection, history_collection
 from server.models import (
@@ -93,6 +94,22 @@ class ConversationService:
                     detail="Conversation not found or access denied"
                 )
             
+            # Lazy Migration: Ensure all messages have IDs
+            messages = conversation.get("messages", [])
+            updated = False
+            for msg in messages:
+                if "id" not in msg:
+                    msg["id"] = str(uuid.uuid4())
+                    if "is_favorite" not in msg:
+                        msg["is_favorite"] = False
+                    updated = True
+            
+            if updated:
+                await conversation_collection.update_one(
+                    {"_id": ObjectId(conversation_id)},
+                    {"$set": {"messages": messages}}
+                )
+            
             return self._format_conversation_response(conversation)
             
         except HTTPException:
@@ -119,14 +136,17 @@ class ConversationService:
             Paginated list of conversations
         """
         try:
-            query = {"historique_id": ObjectId(historique_id)}
+            query = {
+                "historique_id": ObjectId(historique_id),
+                "messages.0": {"$exists": True} # Only return conversations with at least 1 message
+            }
             
             # Get total count
             total = await conversation_collection.count_documents(query)
             
-            # Get paginated conversations, sorted by last_updated (newest first)
+            # Get paginated conversations, sorted by is_pinned (desc) then last_updated (desc)
             cursor = conversation_collection.find(query).sort(
-                "last_updated", -1
+                [("is_pinned", -1), ("last_updated", -1)]
             ).skip(pagination.skip).limit(pagination.limit)
             
             conversations = await cursor.to_list(length=pagination.limit)
@@ -151,6 +171,80 @@ class ConversationService:
                 detail=f"Failed to list conversations: {str(e)}"
             )
     
+    async def toggle_pin_status(
+        self,
+        conversation_id: str,
+        historique_id: str,
+        is_pinned: bool
+    ) -> bool:
+        """
+        Update conversation pin status
+        """
+        try:
+            result = await conversation_collection.update_one(
+                {
+                    "_id": ObjectId(conversation_id),
+                    "historique_id": ObjectId(historique_id)
+                },
+                {"$set": {"is_pinned": is_pinned}}
+            )
+            
+            if result.matched_count == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Conversation not found or access denied"
+                )
+            return True
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update pin status: {str(e)}"
+            )
+
+    async def toggle_message_favorite(
+        self,
+        conversation_id: str,
+        historique_id: str,
+        message_id: str,
+        is_favorite: bool
+    ) -> bool:
+        """
+        Toggle favorite status for a specific message
+        """
+        try:
+            # First check if conversation exists and belongs to user
+            # Then update specific message in array using positional operator $
+            query = {
+                "_id": ObjectId(conversation_id),
+                "historique_id": ObjectId(historique_id),
+                "messages.id": message_id
+            }
+            
+            update = {
+                "$set": {"messages.$.is_favorite": is_favorite}
+            }
+            
+            result = await conversation_collection.update_one(query, update)
+            
+            if result.matched_count == 0:
+                # Could mean conversation not found OR message not found
+                # Check conversation existence separately if needed, but 404 is appropriate
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Message not found or access denied"
+                )
+            
+            return True
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update message favorite status: {str(e)}"
+            )
+
     async def add_messages(
         self,
         conversation_id: str,
@@ -258,6 +352,7 @@ class ConversationService:
         return ConversationResponse(
             id=str(conversation["_id"]),
             titre=conversation["titre"],
+            is_pinned=conversation.get("is_pinned", False),
             messages=messages,
             created_at=conversation["created_at"].isoformat(),
             last_updated=conversation["last_updated"].isoformat(),
@@ -280,6 +375,7 @@ class ConversationService:
         return ConversationListItem(
             id=str(conversation["_id"]),
             titre=conversation["titre"],
+            is_pinned=conversation.get("is_pinned", False),
             last_updated=conversation["last_updated"].isoformat(),
             message_count=len(messages),
             preview=preview

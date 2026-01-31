@@ -3,6 +3,7 @@ import { useAppContext } from "../context/AppContext";
 import { assets } from "../../assets/assets";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { Pin } from "lucide-react";
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   const navigate = useNavigate();
@@ -14,7 +15,9 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
     user,
     deleteChat,
     createNewChat,
-    logout
+    logout,
+    loadChatDetails,
+    pinChat
   } = useAppContext();
   const [search, setSearch] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
@@ -47,7 +50,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         }}
         className="flex justify-center items-center w-full py-2 mt-10 text-white bg-gradient-to-b from-[#A456F7] to-[#3D81F6] text-sm rounded-md cursor-pointer hover:opacity-90 transition"
       >
-        <span className="mr-2 text-xl">+</span> New Chat
+        <span className="mr-2 text-xl">+</span> Nouveau Chat
       </button>
 
 
@@ -58,13 +61,13 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           type="text"
-          placeholder="Search conversations"
+          placeholder="Rechercher des conversations"
           className="text-xs placeholder:text-gray-400 outline-none bg-transparent w-full"
         />
       </div>
 
       {/* chats */}
-      {chats.length > 0 && <p className="mt-4 text-sm">Recent Chats</p>}
+      {chats.length > 0 && <p className="mt-4 text-sm">Discussions récentes</p>}
 
       <div className="flex-1 overflow-y-scroll mt-3 space-y-3 text-sm">
         {chats
@@ -78,7 +81,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
               key={chat._id}
               onClick={() => {
                 navigate("/");
-                setSelectedChat(chat);
+                loadChatDetails(chat._id);
                 setIsMenuOpen(false);
               }}
               className="p-2 px-4 dark:bg-[#57317C]/10 border border-gray-300 dark:border-[#80609F]/15 rounded-md cursor-pointer flex justify-between group"
@@ -94,14 +97,23 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 </p>
               </div>
 
-              <img
-                src={assets.bin_icon}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setChatToDelete(chat._id)
-                }}
-                className="hidden group-hover:block w-4 not-dark:invert"
-              />
+              <div className="flex items-center gap-2">
+                <Pin
+                  className={`w-4 h-4 cursor-pointer hover:text-purple-400 ${chat.is_pinned ? 'fill-current text-purple-500' : 'text-gray-400 hidden group-hover:block'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    pinChat(chat._id, !chat.is_pinned);
+                  }}
+                />
+                <img
+                  src={assets.bin_icon}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setChatToDelete(chat._id)
+                  }}
+                  className="hidden group-hover:block w-4 not-dark:invert opacity-70 hover:opacity-100 cursor-pointer"
+                />
+              </div>
 
             </div>
           ))}
@@ -110,10 +122,10 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
 
       {/* dark mode */}
-      <div className="flex items-center justify-between p-3 mt-4 border rounded-md">
+      <div className="flex items-center justify-between p-3 mt-4 border rounded-md cursor-pointer select-none">
         <div className="flex items-center gap-2 text-sm">
           <img src={assets.theme_icon} className="w-4 not-dark:invert" />
-          <p>Dark Mode</p>
+          <p>Mode Sombre</p>
         </div>
         <label className="relative inline-flex cursor-pointer">
           <input
@@ -131,13 +143,13 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       <div className="flex items-center gap-3 p-3 mt-4 border rounded-md group">
         <img src={assets.user_icon} className="w-7 rounded-full" />
         <p className="flex-1 text-sm truncate">
-          {user ? user.name : "Login your account"}
+          {user ? (user.username || user.name) : "Connectez-vous"}
         </p>
         {user && (
           <img
             src={assets.logout_icon}
             onClick={() => setShowLogoutConfirm(true)}
-            className="h-5 hidden group-hover:block not-dark:invert"
+            className="h-5 hidden group-hover:block not-dark:invert cursor-pointer"
           />
 
         )}
@@ -154,7 +166,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           <div className="bg-white dark:bg-[#1E1B22] p-6 rounded-xl w-80 text-center space-y-4 shadow-xl">
 
             <p className="text-sm">
-              Delete this chat?
+              Supprimer cette conversation?
             </p>
 
             <div className="flex gap-3 justify-center">
@@ -162,7 +174,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 onClick={() => setChatToDelete(null)}
                 className="px-4 py-1.5 text-sm border rounded-md hover:bg-gray-100 dark:hover:bg-white/10"
               >
-                Cancel
+                Annuler
               </button>
 
               <button
@@ -172,7 +184,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 }}
                 className="px-4 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
               >
-                Delete
+                Supprimer
               </button>
             </div>
 
@@ -184,7 +196,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           <div className="bg-white dark:bg-[#1E1B22] p-6 rounded-xl w-80 text-center space-y-4 shadow-xl">
 
             <p className="text-sm">
-              Are you sure you want to logout?
+              Voulez-vous vraiment vous déconnecter?
             </p>
 
             <div className="flex gap-3 justify-center">
@@ -192,18 +204,18 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 onClick={() => setShowLogoutConfirm(false)}
                 className="px-4 py-1.5 text-sm border rounded-md hover:bg-gray-100 dark:hover:bg-white/10"
               >
-                Cancel
+                Annuler
               </button>
 
               <button
                 onClick={() => {
                   logout()
                   setShowLogoutConfirm(false)
-                  navigate("/login")
+                  navigate("/")
                 }}
                 className="px-4 py-1.5 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
               >
-                Logout
+                Déconnexion
               </button>
             </div>
 

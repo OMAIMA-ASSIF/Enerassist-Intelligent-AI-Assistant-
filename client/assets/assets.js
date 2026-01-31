@@ -1,6 +1,6 @@
-import logo from "./logo.svg";
-import logo_full from "./logo_full.svg";
-import logo_full_dark from "./logo_full_dark.svg";
+import logo from "./logo.png";
+import logo_full from "./logo_full.png";
+import logo_full_dark from "./logo_full_dark.png";
 import search_icon from "./search_icon.svg";
 import user_icon from "./user_icon.svg";
 import theme_icon from "./theme_icon.svg";
@@ -25,7 +25,6 @@ import ai_image8 from "./ai_image8.jpg";
 import ai_image9 from "./ai_image9.jpg";
 import ai_image10 from "./ai_image10.jpg";
 import ai_image11 from "./ai_image11.jpg";
-import ai_image12 from "./ai_image12.jpg";
 
 export const assets = {
     logo,

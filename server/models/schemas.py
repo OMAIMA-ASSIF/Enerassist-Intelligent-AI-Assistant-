@@ -6,22 +6,26 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
-
+import uuid
 
 # ==================== Message Models ====================
 
 class MessageBase(BaseModel):
     """Base message structure"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     role: str = Field(..., pattern="^(user|assistant)$")
     texte: str = Field(..., min_length=1, max_length=10000)
     date: datetime = Field(default_factory=datetime.utcnow)
+    is_favorite: bool = False
 
     model_config = {
         "json_schema_extra": {
             "example": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
                 "role": "user",
                 "texte": "Bonjour",
-                "date": "2024-01-29T11:00:00Z"
+                "date": "2024-01-29T11:00:00Z",
+                "is_favorite": False
             }
         }
     }
@@ -37,6 +41,7 @@ class MessageResponse(MessageBase):
 class ConversationBase(BaseModel):
     """Base conversation structure"""
     titre: str = Field(default="Nouvelle conversation", max_length=200)
+    is_pinned: bool = False
 
 
 class ConversationCreate(ConversationBase):
@@ -48,6 +53,7 @@ class ConversationResponse(BaseModel):
     """Conversation response for API"""
     id: str
     titre: str
+    is_pinned: bool = False
     messages: List[MessageResponse]
     created_at: str
     last_updated: str
@@ -58,6 +64,7 @@ class ConversationListItem(BaseModel):
     """Lightweight conversation item for listing"""
     id: str
     titre: str
+    is_pinned: bool = False
     last_updated: str
     message_count: int
     preview: Optional[str] = None
@@ -134,3 +141,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     sub: Optional[str] = None
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse

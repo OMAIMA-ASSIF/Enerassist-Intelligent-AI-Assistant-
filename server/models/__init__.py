@@ -14,7 +14,8 @@ from server.models.schemas import (
     UserCreate,
     UserResponse,
     Token,
-    TokenData
+    TokenData,
+    AuthResponse
 )
 
 __all__ = [
@@ -33,5 +34,6 @@ __all__ = [
     "UserCreate",
     "UserResponse",
     "Token",
-    "TokenData"
+    "TokenData",
+    "AuthResponse"
 ]

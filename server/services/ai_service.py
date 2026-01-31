@@ -10,8 +10,9 @@ from datetime import datetime
 # Add the ai directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "ai"))
 
-from ai.chatbot import get_chatbot_chain
+from ai.chatbot import get_chatbot_chain, create_atlassian_ticket
 from server.models import MessageBase
+from langchain_core.messages import HumanMessage, AIMessage
 
 
 class AIService:
@@ -30,47 +31,55 @@ class AIService:
             self._chain = get_chatbot_chain()
         return self._chain
     
-    async def generate_response(
+    async def stream_response(
         self,
         user_message: str,
         conversation_id: str,
-        chat_history: List[MessageBase]
-    ) -> str:
+        chat_history: List[MessageBase],
+        user_email: str = "Non spécifié"
+    ) -> AsyncGenerator[str, None]:
         """
-        Generate AI response for a user message
-        
-        Args:
-            user_message: The user's input message
-            conversation_id: Unique conversation identifier (used as session_id)
-            chat_history: Previous messages in the conversation
-            
-        Returns:
-            AI-generated response text
+        Stream AI response for a user message
         """
         try:
             chain = self._get_chain()
             
-            # Configure session for conversation context
-            config = {
-                "configurable": {
-                    "session_id": conversation_id
-                }
-            }
-            
-            # Stream the response and collect chunks
-            response_chunks = []
+            # Convert DB history to LangChain messages
+            lc_history = []
+            for msg in chat_history:
+                if msg.role == "user":
+                    lc_history.append(HumanMessage(content=msg.texte))
+                elif msg.role == "assistant":
+                    lc_history.append(AIMessage(content=msg.texte))
             
             async for chunk in self._stream_response(
                 chain=chain,
                 user_message=user_message,
-                config=config
+                chat_history=lc_history,
+                user_email=user_email
             ):
+                yield chunk
+            
+        except Exception as e:
+            print(f"❌ AI Service Error: {str(e)}")
+            raise AIServiceException(f"Failed to generate AI response: {str(e)}")
+
+    async def generate_response(
+        self,
+        user_message: str,
+        conversation_id: str,
+        chat_history: List[MessageBase],
+        user_email: str = "Non spécifié"
+    ) -> str:
+        """
+        Generate AI response for a user message
+        """
+        try:
+            response_chunks = []
+            async for chunk in self.stream_response(user_message, conversation_id, chat_history, user_email):
                 response_chunks.append(chunk)
             
-            # Join all chunks to get complete response
-            complete_response = "".join(response_chunks)
-            
-            return complete_response
+            return "".join(response_chunks)
             
         except Exception as e:
             print(f"❌ AI Service Error: {str(e)}")
@@ -80,29 +89,40 @@ class AIService:
         self,
         chain,
         user_message: str,
-        config: Dict
+        chat_history: List,
+        user_email: str = "Non spécifié"
     ) -> AsyncGenerator[str, None]:
         """
-        Stream AI response chunks
-        
-        Note: This is a synchronous-to-async wrapper
-        In production, you might want to use actual async streaming
+        Stream AI response chunks while handling tool calls
         """
         try:
-            # The chatbot chain uses synchronous streaming
-            # We wrap it to be compatible with async context
-            for chunk in chain.stream({"input": user_message}, config=config):
-                # Handle different chunk types from LangChain
-                if isinstance(chunk, str):
-                    yield chunk
-                elif hasattr(chunk, "content"):
-                    yield chunk.content
-                else:
-                    # Handle AIMessage or other types
-                    yield str(chunk)
+            # Use invoke to properly capture tool_calls
+            response = chain.invoke({"input": user_message, "chat_history": chat_history})
+            
+            # 1. Yield text content if any
+            if response.content:
+                yield response.content
+            
+            # 2. Handle tool calls
+            if hasattr(response, 'tool_calls') and response.tool_calls:
+                for tool_call in response.tool_calls:
+                    if tool_call["name"] == "create_atlassian_ticket":
+                        yield "\n⚙️ Connexion au serveur MCP en cours...\n"
+                        
+                        # Inject user_email into arguments
+                        args = tool_call["args"]
+                        args["user_email"] = user_email
+                        
+                        # Execute the tool
+                        ticket_result = create_atlassian_ticket.invoke(args)
+                        yield f"\n✅ {ticket_result}\n"
+            
+            # Fallback for empty responses to avoid Pydantic validation error
+            if not response.content and not (hasattr(response, 'tool_calls') and response.tool_calls):
+                yield "Désolé, je n'ai pas pu traiter votre demande. Pouvez-vous reformuler ?"
                     
         except Exception as e:
-            raise AIServiceException(f"Streaming error: {str(e)}")
+            raise AIServiceException(f"Error generating AI response: {str(e)}")
     
     def generate_conversation_title(self, first_message: str) -> str:
         """

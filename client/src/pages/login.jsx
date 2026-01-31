@@ -37,8 +37,23 @@ const Login = () => {
 
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
-        // Optional: Decode token to get user info if needed
+
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          // We need to access context, but we are inside a component. 
+          // Ideally we would call setUser here.
+          // Since we can't easily access context state setter passed via generic hook if it's not exposed or we need to reload.
+          // Better: We should probably just rely on the fact that we redirect to home, and home will re-fetch or we reload.
+          // But to be immediate, let's see if we can trigger a reload or update.
+          // Actually, AppContext.jsx has `fetchUser` which runs on mount.
+          // If we navigate to '/', the App component might remount or we need to trigger state update.
+          // Let's modify Login to take `setUser` from context or just reload.
+          // Simplest is to reload or just navigate and let AppContext pick it up if it re-runs. 
+          // But `fetchUser` only runs on mount. Navigation doesn't unmount App usually.
+          // So we should get `setUser` from context.
+        }
         navigate('/');
+        window.location.reload(); // Force reload to ensure context picks up new user from localStorage
       }
     } catch (err) {
       console.error(err);
@@ -55,6 +70,15 @@ const Login = () => {
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
       </div>
+
+      {/* Back Button */}
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-6 left-6 z-50 p-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white transition-all duration-200 backdrop-blur-md group cursor-pointer"
+        title="Return to Home"
+      >
+        <ArrowRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
+      </button>
 
       <div className="w-full max-w-md relative z-10">
         <motion.div
@@ -146,7 +170,7 @@ const Login = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl py-3 font-medium shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-purple-900/40'}`}
+              className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl py-3 font-medium shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2 transition-all cursor-pointer ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-purple-900/40'}`}
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -164,7 +188,7 @@ const Login = () => {
               {isLogin ? 'Pas encore de compte ?' : 'Déjà un compte ?'}
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="ml-2 text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                className="ml-2 text-purple-400 hover:text-purple-300 font-medium transition-colors cursor-pointer"
               >
                 {isLogin ? 'Créer un compte' : 'Se connecter'}
               </button>

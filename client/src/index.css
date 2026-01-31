@@ -7,6 +7,17 @@
     font-family: "Outfit", sans-serif;
 }
 
+/* Force dark autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #27272a inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+    background-clip: content-box !important;
+}
+
 @theme {
     --color-primary: #E6CCFF;
 }

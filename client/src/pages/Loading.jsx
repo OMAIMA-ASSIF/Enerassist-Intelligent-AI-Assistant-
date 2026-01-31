@@ -19,4 +19,4 @@ const Loading = () => {
     )
 }
 // 1:48:03
-export default Loading
+export default Loading;

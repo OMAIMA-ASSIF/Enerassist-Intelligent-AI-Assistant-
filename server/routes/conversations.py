@@ -195,3 +195,86 @@ async def clear_all_conversations(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to clear conversations: {str(e)}"
         )
+@router.patch("/{conversation_id}/pin", status_code=status.HTTP_200_OK)
+async def pin_conversation(
+    conversation_id: str,
+    is_pinned: bool,
+    current_user: dict = Depends(get_current_user),
+    conversation_service: ConversationService = Depends(get_conversation_service),
+    history_service: HistoryService = Depends(get_history_service)
+):
+    """
+    Toggle pin status for a conversation
+    
+    Authentication: Required (JWT)
+    """
+    try:
+        user_id = str(current_user["_id"])
+        
+        # Get user's history
+        historique_id = await history_service.get_or_create_history(user_id)
+        
+        # Toggle pin status
+        await conversation_service.toggle_pin_status(
+            conversation_id=conversation_id,
+            historique_id=historique_id,
+            is_pinned=is_pinned
+        )
+        
+        return {
+            "message": "Conversation pin status updated",
+            "conversation_id": conversation_id,
+            "is_pinned": is_pinned
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update pin status: {str(e)}"
+        )
+
+
+@router.patch("/{conversation_id}/messages/{message_id}/favorite", status_code=status.HTTP_200_OK)
+async def toggle_message_favorite(
+    conversation_id: str,
+    message_id: str,
+    is_favorite: bool,
+    current_user: dict = Depends(get_current_user),
+    conversation_service: ConversationService = Depends(get_conversation_service),
+    history_service: HistoryService = Depends(get_history_service)
+):
+    """
+    Toggle favorite status for a specific message
+    
+    Authentication: Required (JWT)
+    """
+    try:
+        user_id = str(current_user["_id"])
+        
+        # Get user's history
+        historique_id = await history_service.get_or_create_history(user_id)
+        
+        # Toggle favorite status
+        await conversation_service.toggle_message_favorite(
+            conversation_id=conversation_id,
+            historique_id=historique_id,
+            message_id=message_id,
+            is_favorite=is_favorite
+        )
+        
+        return {
+            "message": "Message favorite status updated",
+            "conversation_id": conversation_id,
+            "message_id": message_id,
+            "is_favorite": is_favorite
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update message favorite status: {str(e)}"
+        )
