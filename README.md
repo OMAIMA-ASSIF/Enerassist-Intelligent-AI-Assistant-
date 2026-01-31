@@ -13,8 +13,8 @@ Ce projet est un chatbot intelligent spécialisé dans le **dépannage technique
 *   **🔐 Authentification Sécurisée** : Système robuste basé sur JWT et FastAPI.
 
 ---
-## 📺 Démonstration du projet HI5
-<video src="https://github.com/OMAIMA-ASSIF/Enerassist-Intelligent-AI-Assistant-/blob/main/demo-%20Enerassist.mp4" controls width="100%">
+## 📺 Démonstration du projet HI5 
+<video src="https://github.com/OMAIMA-ASSIF/Enerassist-Intelligent-AI-Assistant-/blob/main/demo-%20Enerassist.mp4?raw=true" controls width="100%">
   Votre navigateur ne supporte pas la lecture de vidéos.
 </video>
 
