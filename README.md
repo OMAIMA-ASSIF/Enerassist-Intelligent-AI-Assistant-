@@ -136,7 +136,3 @@ L'application sera disponible sur `http://localhost:5173`.
 3.  **Dépannage** : Suivez les instructions de l'IA.
 4.  **Ticketing** : Si le problème n'est pas résolu, dites "Rien ne marche" ou demandez un ticket. L'IA créera alors une demande dans votre Jira avec les détails techniques.
 
----
-
-> [!IMPORTANT]
-> **Sécurité** : Ne jamais push vos fichiers `.env` sur un repo public. Assurez-vous qu'ils sont bien listés dans le `.gitignore`.
