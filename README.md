@@ -14,7 +14,7 @@ Ce projet est un chatbot intelligent spécialisé dans le **dépannage technique
 
 ---
 ## 📺 Démonstration du projet HI5
-<video src="demo-Enerassist" controls width="100%">
+<video src="https://github.com/OMAIMA-ASSIF/Enerassist-Intelligent-AI-Assistant-/blob/main/demo-%20Enerassist.mp4" controls width="100%">
   Votre navigateur ne supporte pas la lecture de vidéos.
 </video>
 
