@@ -98,6 +98,10 @@ Créez un fichier `.env` dans ce dossier avec vos identifiants Atlassian :
 JIRA_URL=https://votre-site.atlassian.net
 JIRA_USERNAME=votre-email@exemple.com
 JIRA_API_TOKEN=votre_token_api_atlassian
+ATLASSIAN_EMAIL=ton-email-atlassian
+ATLASSIAN_API_TOKEN=
+
+
 ```
 
 ### 5. Configuration du Frontend
