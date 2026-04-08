@@ -1,4 +1,4 @@
-# 🤖 AI Technical Assistant & Incident Management (HI5)
+# 🤖 AI Technical Assistant & Incident Management 
 
 Ce projet est un assistant intelligent spécialisé dans le **dépannage technique industriel** (électrovannes et vannes de zone). Il utilise une architecture **RAG (Retrieval-Augmented Generation)** pour fournir des réponses précises basées sur une documentation technique, et intègre un système (MCP) de **ticketing Jira automatique** en cas d'échec de résolution.
 
